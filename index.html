@@ -49,7 +49,7 @@
 
 	padding-left	: 10px;
 	padding-right	: 10px;
-};
+}
 #scoreLeft {
 	left		: 0;	
 }
@@ -61,20 +61,22 @@
 <div id="scoreLeft"	class="score">0</div>
 <div id="scoreRight"	class="score">0</div>
 <script>
-	// init audio layer
-	var webaudio	= new WebAudio();
-	webaudio.volume(0.5)
-	// init each sound
-	var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.1640,0.0000,0.1880,20.0000,594.0000,2400.0000,0.5440,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.5616,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
-	var soundRacketWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-	var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.3560,0.0000,0.1900,20.0000,358.0000,2400.0000,0.3000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.1810,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
-	var soundRacketBall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-	soundRacketBall.volume(0.1)
-	var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.1640,0.0000,0.1380,20.0000,231.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0625,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.1000,0.0000];
-	var soundWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-	soundWall.volume(0.1)
-	var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.2800,0.0000,0.2380,20.0000,837.0000,2400.0000,-0.7300,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.3235,0.0100,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
-	var soundLose	= webaudio.createSound().generateWithJsfx(jsfxParam);
+	if( WebAudio.isAvailable ){
+		// init audio layer
+		var webaudio	= new WebAudio();
+		webaudio.volume(0.5)
+		// init each sound
+		var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.1640,0.0000,0.1880,20.0000,594.0000,2400.0000,0.5440,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.5616,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
+		var soundRacketWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
+		var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.3560,0.0000,0.1900,20.0000,358.0000,2400.0000,0.3000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.1810,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
+		var soundRacketBall	= webaudio.createSound().generateWithJsfx(jsfxParam);
+		soundRacketBall.volume(0.1)
+		var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.1640,0.0000,0.1380,20.0000,231.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0625,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.1000,0.0000];
+		var soundWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
+		soundWall.volume(0.1)
+		var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.2800,0.0000,0.2380,20.0000,837.0000,2400.0000,-0.7300,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.3235,0.0100,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
+		var soundLose	= webaudio.createSound().generateWithJsfx(jsfxParam);		
+	}
 
 
 
@@ -155,7 +157,7 @@
 		var score	= parseInt(element.innerHTML);
 		score++;
 		element.innerHTML= score;
-		soundLose.play();
+		soundLose && soundLose.play();
 		// reset ball velocity
 		ballAngle	= 0.1 * (Math.random()*2-1)*Math.PI*2;
 		ballAngle	+= playerId === 'right' ? 0 : Math.PI;
@@ -175,8 +177,8 @@
 		// handle racket limit
 		Object.keys(players).forEach(function(playerId){
 			var tMesh	= players[playerId].object3d.get(0);
-			if( tMesh.position.z < -fieldD/2 + racketD/2 )	soundRacketWall.play();
-			if( tMesh.position.z > +fieldD/2 - racketD/2 )	soundRacketWall.play();
+			if( tMesh.position.z < -fieldD/2 + racketD/2 )	soundRacketWall && soundRacketWall.play();
+			if( tMesh.position.z > +fieldD/2 - racketD/2 )	soundRacketWall && soundRacketWall.play();
 			tMesh.position.z	= Math.max(tMesh.position.z, -fieldD/2 + racketD/2);
 			tMesh.position.z	= Math.min(tMesh.position.z, +fieldD/2 - racketD/2);
 		});
@@ -186,7 +188,7 @@
 	*/
 	players['right'].onContact = players['left'].onContact = function(player, ball3d){
 		// play a sound
-		soundRacketBall.play();
+		soundRacketBall && soundRacketBall.play();
 
 		// increase velocity 
 		ballVelX 	*= 1.1;
@@ -291,7 +293,7 @@
 		.castShadow(true)
 		
 	function wallOnContact(object){
-		soundWall.play();
+		soundWall && soundWall.play();
 		
 		var tweenvars	= {
 			scale	: 1
