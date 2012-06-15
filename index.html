@@ -5,6 +5,8 @@
 <script src="vendor/threex/THREEx.KeyboardState.js"></script>
 <script src="vendor/tquery/tquery.keyboard.js"></script>
 
+<script src="vendor/tquery/tquery.addblueskybackground.js"></script>
+
 <script src="vendor/tquery/tquery.meshlambertmaterial.js"></script>
 <script src="vendor/tquery/tquery.meshphongmaterial.js"></script>
 <script src="vendor/tquery/tquery.meshbasicmaterial.js"></script>
@@ -88,17 +90,13 @@
 	world.tCamera().position.z	= 10.2;
 	world.tCamera().position.normalize().setLength(3);
 	world.tCamera().lookAt(world.tScene().position);
-
+	
+	world.tRenderer().setClearColorHex(0,0);
+	tQuery.addBlueSkyBackground();
+	
 	// enable shadow in the renderer
 	world.tRenderer().shadowMapEnabled	= true;
 	world.tRenderer().shadowMapSoft		= true;
-	
-	// add a skybox
-	var skymapUrls	= tQuery.TextureCube.createUrls('skybox', '.jpg', 'images');
-	var textureCube	= THREE.ImageUtils.loadTextureCube(skymapUrls);
-	tQuery.createSkymap({
-		textureCube: textureCube
-	}).addTo(world);
 
 	// create the ground
 	tQuery.createCube(1,0.2,1, 3,3,3).addTo(world)
@@ -107,12 +105,6 @@
 		.scale(3*1.5, 1, 1.8*1.5)
 		.translateY(-0.2-0.1)
 		.setLambertMaterial().map('images/grasslight-big.jpg').ambient(0x444444).back();
-
-	// add postprocessing effects
-	world.addEffectComposer()
-		//.motionBlur(0.7)
-		.vignette()
-		.finish();
 
 	// lights
 	tQuery.createAmbientLight().addTo(world).color(0x444444)

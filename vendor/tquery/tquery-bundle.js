@@ -2369,7 +2369,10 @@ tQuery.pluginsInstanceOn(tQuery.Object3D);
 */
 tQuery.mixinAttributes(tQuery.Object3D, {
 	receiveShadow	: tQuery.convert.toBool,
-	castShadow	: tQuery.convert.toBool
+	castShadow	: tQuery.convert.toBool,
+	
+	doubleSided	: tQuery.convert.toBool,
+	flipSided	: tQuery.convert.toBool
 });
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -3973,6 +3976,10 @@ tQuery.World.register('addBoilerplate', function(opts){
 	});
 	// get the context
 	var ctx	= {};
+	
+	// make tRenderer.domElement style "display: block" - by default it is inline-block
+	// - so it is affected by line-height and create a white line at the bottom
+	this.tRenderer().domElement.style.display = "block"
 
 	// create the context
 	tQuery.data(this, '_boilerplateCtx', ctx);
