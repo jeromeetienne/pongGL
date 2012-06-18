@@ -35,6 +35,7 @@
 <script src="vendor/jsfx/jsfxlib.js"></script>
 
 <script src="vendor/tquery/Tween.js"></script>
+<script src="tquery.tween.js"></script>
 
 <style>
 .score	{
@@ -99,6 +100,9 @@
 	world.tRenderer().shadowMapEnabled	= true;
 	world.tRenderer().shadowMapSoft		= true;
 
+	// enable tween updater	
+	world.enableTweenUpdater();
+
 	// create the ground
 	tQuery.createCube(1,0.2,1, 3,3,3).addTo(world)
 		.receiveShadow(true)
@@ -129,11 +133,11 @@
 		var url		= "images/plywood.jpg";
 		var playerColor	= playerId === 'right' ? 0xffaacc : 0xccaaff;
 		var object3d	= tQuery.createCube(1,1,1,2,2,2).addTo(world)
-				.scale(racketW, 0.2, racketD)
+				.geometry().scaleBy(racketW, 0.2, racketD).back()
 				.setLambertMaterial().color(playerColor).ambient(0xaaaaaa).map(url).back()
 				.id(playerId)
 				.castShadow(true)
-				.geometry().smooth(2).back()
+				.geometry().computeAll().smooth(2).back()
 
 		object3d.translateX(1.3 * (playerId === "right" ? +1 : -1));
 		player.object3d	= object3d;
@@ -165,8 +169,8 @@
 		var speedY	= 2 * (60*delta);
 		if( keyboard.pressed('up') )	players['right'].object3d.translateZ(-delta*speedY);
 		if( keyboard.pressed('down') )	players['right'].object3d.translateZ(+delta*speedY);
-		if( keyboard.pressed('s') )	players['left'] .object3d.translateZ(-delta*speedY);
-		if( keyboard.pressed('x') )	players['left'] .object3d.translateZ(+delta*speedY);
+		if( keyboard.pressed('q') )	players['left'] .object3d.translateZ(-delta*speedY);
+		if( keyboard.pressed('w') )	players['left'] .object3d.translateZ(+delta*speedY);
 		// handle racket limit
 		Object.keys(players).forEach(function(playerId){
 			var tMesh	= players[playerId].object3d.get(0);
@@ -182,6 +186,15 @@
 	players['right'].onContact = players['left'].onContact = function(player, ball3d){
 		// play a sound
 		soundRacketBall && soundRacketBall.play();
+
+		// tween the scale
+		tQuery.createTween({
+			scale	: 1
+		}).easing(TWEEN.Easing.Bounce.Out).to({
+			scale	: 2
+		}, 250).onUpdate(function(){
+			player.object3d.scale(this.scale, this.scale, this.scale);
+		}).start().thenBounce(200).easing(TWEEN.Easing.Quadratic.InOut).back()
 
 		// increase velocity 
 		ballVelX 	*= 1.1;
@@ -287,29 +300,16 @@
 		
 	function wallOnContact(object){
 		soundWall && soundWall.play();
-		
-		var tweenvars	= {
+
+		// tween the scale
+		tQuery.createTween({
 			scale	: 1
-		};
-		var tweenFwd	= new TWEEN.Tween(tweenvars).to({
+		}).easing(TWEEN.Easing.Elastic.Out).to({
 			scale	: 2
-		}, 100).easing(TWEEN.Easing.Elastic.Out).onUpdate(function(){
+		}, 100).onUpdate(function(){
 			object.scale(1, this.scale, this.scale);
-		});
-		// setup a backward tween
-		var tweenBack	= new TWEEN.Tween(tweenvars).to({
-			scale	: 1
-		}, 200).easing(TWEEN.Easing.Linear.None)
-		.onUpdate(function(){
-			object.scale(1, this.scale, this.scale);
-		});
-		tweenFwd.chain(tweenBack);
-		tweenFwd.start();
+		}).start().thenBounce(200).easing(TWEEN.Easing.Linear.None).back()
 	}
 	
-	// update TWEEN with world.loop
-	world.loop().hook(function(){
-		TWEEN.update();
-	});
 	
 </script></body>
