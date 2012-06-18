@@ -122,7 +122,7 @@
 		//.shadowCameraVisible(true);
 
 	// some constants for players
-	var players	= { "right" : {}, "left": {} };	
+	var players	= { "right" : { playerId : "right" }, "left": { playerId : "left" } };	
 	var racketW	= 0.1;
 	var racketD	= 0.5;
 	var racketRangeY= 2;
@@ -131,7 +131,7 @@
 		var player	= players[playerId];
 		// create tQuery.Object3D for a racket
 		var url		= "images/plywood.jpg";
-		var playerColor	= playerId === 'right' ? 0xffaacc : 0xccaaff;
+		var playerColor	= playerId === 'right' ? 0xF04040 : 0x1c58e0;
 		var object3d	= tQuery.createCube(1,1,1,2,2,2).addTo(world)
 				.geometry().scaleBy(racketW, 0.2, racketD).back()
 				.setLambertMaterial().color(playerColor).ambient(0xaaaaaa).map(url).back()
@@ -187,14 +187,41 @@
 		// play a sound
 		soundRacketBall && soundRacketBall.play();
 
+		// increase velocity 
+		ballVelX 	*= 1.1;
+		ballVelZ	*= 1.1;
+
+		var ballSpeed	= Math.sqrt(ballVelX*ballVelX + ballVelZ*ballVelZ);		
+
+
 		// tween the scale
 		tQuery.createTween({
 			scale	: 1
 		}).easing(TWEEN.Easing.Bounce.Out).to({
 			scale	: 2
-		}, 250).onUpdate(function(){
+		}, 200).onUpdate(function(){
 			player.object3d.scale(this.scale, this.scale, this.scale);
-		}).start().thenBounce(200).easing(TWEEN.Easing.Quadratic.InOut).back()
+		}).start().thenBounce(250).easing(TWEEN.Easing.Elastic.In).back()
+
+		// tween the rotationZ/positionZ
+		tQuery.createTween({
+			rotationZ	: 0,
+			positionZ	: 0
+		}).easing(TWEEN.Easing.Quintic.Out).to({
+			rotationZ	: Math.PI/3,
+			positionZ	: 0.2
+		}, 200).onUpdate(function(){
+			var playerId	= player.playerId;
+			var tObject3d	= player.object3d.get(0);
+
+			var rotationZ	= this.rotationZ;
+			if( playerId === 'right' )	rotationZ	*= -1;
+			tObject3d.rotation.z	= rotationZ;
+
+			var positionZ	= -this.positionZ;
+			if( playerId === 'right' )	positionZ	*= -1;
+			tObject3d.position.x	= positionZ + (1.3 * (playerId === "right" ? +1 : -1));
+		}).start().thenBounce(250).easing(TWEEN.Easing.Sinusoidal.InOut).back()
 
 		// increase velocity 
 		ballVelX 	*= 1.1;
@@ -216,7 +243,9 @@
 			ballVelZ	= Math.sin(ballAngle)*speed;			
 		}
 		// change racket color randomly
-		player.object3d.get(0).material.color.setHex(0xFfffff*Math.random());
+		//var color	= Math.floor(Math.random()*0xFFFFFF);
+		//console.log("color", "0x"+color.toString(16), new Date)
+		//player.object3d.get(0).material.color.setHex(color);
 	};
 
 	// constant for the field
