@@ -2223,6 +2223,15 @@ tQuery.convert.toBool	= function(value){
 	return undefined;	// never reached - just to workaround linter complaint
 };
 
+tQuery.convert.toString	= function(value){
+	if( arguments.length === 1 && typeof(value) === 'string'){
+		return value;
+	}else{
+		console.assert(false, "invalid parameter");
+	}
+	return undefined;	// never reached - just to workaround linter complaint
+};
+
 tQuery.convert.toTexture	= function(value){
 	if( arguments.length === 1 && value instanceof THREE.Texture ){
 		return value;
@@ -2368,11 +2377,20 @@ tQuery.pluginsInstanceOn(tQuery.Object3D);
  * define all acceptable attributes for this class
 */
 tQuery.mixinAttributes(tQuery.Object3D, {
-	receiveShadow	: tQuery.convert.toBool,
-	castShadow	: tQuery.convert.toBool,
+	eulerOrder		: tQuery.convert.toString,
 	
-	doubleSided	: tQuery.convert.toBool,
-	flipSided	: tQuery.convert.toBool
+	doubleSided		: tQuery.convert.toBool,
+	flipSided		: tQuery.convert.toBool,
+	
+	rotationAutoUpdate	: tQuery.convert.toBool,
+	matrixAutoUpdate	: tQuery.convert.toBool,
+	matrixWorldNeedsUpdate	: tQuery.convert.toBool,
+	useQuaternion		: tQuery.convert.toBool,
+
+	visible			: tQuery.convert.toBool,
+
+	receiveShadow		: tQuery.convert.toBool,
+	castShadow		: tQuery.convert.toBool
 });
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -2708,7 +2726,15 @@ tQuery.inherit(tQuery.Geometry, tQuery.Node);
 /**
  * Make it pluginable
 */
-tQuery.pluginsInstanceOn(tQuery.Geometry);/**
+tQuery.pluginsInstanceOn(tQuery.Geometry);
+
+/**
+ * define all acceptable attributes for this class
+*/
+tQuery.mixinAttributes(tQuery.Geometry, {
+	hasTangents	: tQuery.convert.toBool,
+	dynamic		: tQuery.convert.toBool
+});/**
  * Handle material
  *
  * @class include THREE.Material. It inherit from {@link tQuery.Node}
@@ -2809,7 +2835,6 @@ tQuery.Mesh	= function(elements)
  * inherit from tQuery.Object3D
 */
 tQuery.inherit(tQuery.Mesh, tQuery.Object3D);
-
 
 /**
  * Make it pluginable

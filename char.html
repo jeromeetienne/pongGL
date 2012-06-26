@@ -1,0 +1,11 @@
+<!doctype html><title>Minimal tQuery Page</title>
+<script src="vendor/tquery/tquery-bundle.js"></script>
+<script src="vendor/tquery/tquery.minecraftchar.js"></script>
+<body><script>
+	var world	= tQuery.createWorld().boilerplate().start();
+
+	var character	= new tQuery.MinecraftChar({
+		skinUrl	: "images/agentsmith.png"
+	});
+	character.model.addTo(world);
+</script></body>

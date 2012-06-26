@@ -28,6 +28,8 @@
 
 <script src='vendor/tquery/tquery.light.shadow.js'></script>
 
+<script src='vendor/tquery/tquery.minecraftchar.js'></script>
+
 <script src="vendor/webaudio.js"></script>
 <script src="vendor/webaudio.sound.jsfx.js"></script>
 <script src="vendor/jsfx/audio.js"></script>
@@ -102,6 +104,25 @@
 
 	// enable tween updater	
 	world.enableTweenUpdater();
+
+	var character	= new tQuery.MinecraftChar({
+		skinUrl	: "images/agentsmith.png"
+	});
+	character.model.scaleBy(3/4).translateY(+0.3).translateZ(-1).addTo(world);
+
+	// character.parts.legL.rotation.x = -Math.PI/2;
+	// character.parts.legR.rotation.x = -Math.PI/2;
+	character.parts.armL.rotation.x = -Math.PI/8;
+	character.parts.armR.rotation.x = -Math.PI/8;
+	character.parts.headGroup.matrixAutoUpdate = false;
+	character.parts.headGroup.updateMatrix();
+	world.loop().hook(function(delta, now){
+		var ballPosition= ball3d.get(0).position;
+		var charPosition= character.model.get(0).position;
+		var target	= ballPosition.clone().subSelf(charPosition);
+		character.parts.headGroup.lookAt(target);
+	}); 
+
 
 	// create the ground
 	tQuery.createCube(1,0.2,1, 3,3,3).addTo(world)
@@ -203,24 +224,20 @@
 			player.object3d.scale(this.scale, this.scale, this.scale);
 		}).start().thenBounce(250).easing(TWEEN.Easing.Elastic.In).back()
 
-		// tween the rotationZ/positionZ
-		tQuery.createTween({
-			rotationZ	: 0,
-			positionZ	: 0
+		// tween the positionZ/rotationZ
+		tQuery.createTween({ 
+			positionZ	: 0,
+			rotationZ	: 0
 		}).easing(TWEEN.Easing.Quintic.Out).to({
-			rotationZ	: Math.PI/3,
-			positionZ	: 0.2
+			positionZ	: 0.2,
+			rotationZ	: Math.PI/3
 		}, 200).onUpdate(function(){
 			var playerId	= player.playerId;
 			var tObject3d	= player.object3d.get(0);
-
-			var rotationZ	= this.rotationZ;
-			if( playerId === 'right' )	rotationZ	*= -1;
-			tObject3d.rotation.z	= rotationZ;
-
-			var positionZ	= -this.positionZ;
-			if( playerId === 'right' )	positionZ	*= -1;
+			var positionZ	= playerId === 'right' ? +this.positionZ : -this.positionZ;
 			tObject3d.position.x	= positionZ + (1.3 * (playerId === "right" ? +1 : -1));
+			var rotationZ	= playerId === 'right' ? -this.rotationZ : +this.rotationZ;
+			tObject3d.rotation.z	= rotationZ;
 		}).start().thenBounce(250).easing(TWEEN.Easing.Sinusoidal.InOut).back()
 
 		// increase velocity 
