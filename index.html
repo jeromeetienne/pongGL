@@ -69,18 +69,17 @@
 	if( WebAudio.isAvailable ){
 		// init audio layer
 		var webaudio	= new WebAudio();
-		webaudio.volume(0.5)
+		webaudio.volume(0.25)
 		// init each sound
-		var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.1640,0.0000,0.1880,20.0000,594.0000,2400.0000,0.5440,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.5616,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
-		var soundRacketWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-		var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.3560,0.0000,0.1900,20.0000,358.0000,2400.0000,0.3000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.1810,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
+		var jsfxParam	= ["synth",5.0000,0.2960,0.0000,0.1700,0.0000,0.1600,110.0000,462.0000,2400.0000,-0.7400,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.2165,0.0260,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
 		var soundRacketBall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-		soundRacketBall.volume(0.1)
-		var jsfxParam	= ["square",0.0000,0.4000,0.0000,0.1640,0.0000,0.1380,20.0000,231.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0625,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.1000,0.0000];
+		soundRacketBall.volume(0.3)
+		var jsfxParam	= ["sine",5.0000,0.3220,0.0000,0.0040,0.3210,0.3060,20.0000,347.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
 		var soundWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-		soundWall.volume(0.1)
+		soundWall.volume(0.2)
 		var jsfxParam	= ["saw",0.0000,0.4000,0.0000,0.2800,0.0000,0.2380,20.0000,837.0000,2400.0000,-0.7300,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.3235,0.0100,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
 		var soundLose	= webaudio.createSound().generateWithJsfx(jsfxParam);		
+		soundLose.volume(0.3);
 	}
 
 
@@ -105,15 +104,18 @@
 	// enable tween updater	
 	world.enableTweenUpdater();
 
+	/////////////////////////////////////////////////////////////////////////
+	// add the referee
 	var character	= new tQuery.MinecraftChar({
 		skinUrl	: "images/agentsmith.png"
 	});
-	character.model.scaleBy(3/4).translateY(+0.3).translateZ(-1).addTo(world);
-
-	// character.parts.legL.rotation.x = -Math.PI/2;
-	// character.parts.legR.rotation.x = -Math.PI/2;
+	character.model.scaleBy(2.5/4).translateY(+0.1).translateZ(-1).addTo(world);
+	// setup the limbs positions
+	character.parts.legL.rotation.z = +Math.PI/16;
+	character.parts.legR.rotation.z = -Math.PI/16;
 	character.parts.armL.rotation.x = -Math.PI/8;
 	character.parts.armR.rotation.x = -Math.PI/8;
+	// make the head follow the ball
 	character.parts.headGroup.matrixAutoUpdate = false;
 	character.parts.headGroup.updateMatrix();
 	world.loop().hook(function(delta, now){
@@ -184,23 +186,38 @@
 		// put it back in the center
 		ball3d.position(0,0,0);
 	};
+	function fxIntensityFromBallSpeed(){
+		var ballSpeed	= Math.sqrt(ballVelX*ballVelX + ballVelZ*ballVelZ);
+		// slow: 0.33 fast: 0.1
+		var loSpeed	= 0.033;
+		var hiSpeed	= 0.1;
+		var fxIntensity	= (ballSpeed-loSpeed) / (hiSpeed-loSpeed)
+		fxIntensity	= Math.min(fxIntensity, 1)
+		fxIntensity	= Math.max(fxIntensity, 0)
+		return fxIntensity;
+	}
 	// handle player keyboard
 	world.loop().hook(function(delta){
 		var keyboard	= tQuery.keyboard();
 		var speedY	= 2 * (60*delta);
-		if( keyboard.pressed('up') )	players['right'].object3d.translateZ(-delta*speedY);
-		if( keyboard.pressed('down') )	players['right'].object3d.translateZ(+delta*speedY);
-		if( keyboard.pressed('q') )	players['left'] .object3d.translateZ(-delta*speedY);
-		if( keyboard.pressed('w') )	players['left'] .object3d.translateZ(+delta*speedY);
+		var controls	= {
+			upR	: keyboard.pressed('up'),
+			downR	: keyboard.pressed('down'),
+			upL	: keyboard.pressed('q'),
+			downL	: keyboard.pressed('w') || keyboard.pressed('a'),
+		};
+		if( controls.upR )	players['right'].object3d.translateZ(-delta*speedY);
+		if( controls.downR )	players['right'].object3d.translateZ(+delta*speedY);
+		if( controls.upL )	players['left'] .object3d.translateZ(-delta*speedY);
+		if( controls.downL )	players['left'] .object3d.translateZ(+delta*speedY);
 		// handle racket limit
 		Object.keys(players).forEach(function(playerId){
 			var tMesh	= players[playerId].object3d.get(0);
-			if( tMesh.position.z < -fieldD/2 + racketD/2 )	soundRacketWall && soundRacketWall.play();
-			if( tMesh.position.z > +fieldD/2 - racketD/2 )	soundRacketWall && soundRacketWall.play();
-			tMesh.position.z	= Math.max(tMesh.position.z, -fieldD/2 + racketD/2);
-			tMesh.position.z	= Math.min(tMesh.position.z, +fieldD/2 - racketD/2);
+			tMesh.position.z= Math.max(tMesh.position.z, -fieldD/2 + racketD/2);
+			tMesh.position.z= Math.min(tMesh.position.z, +fieldD/2 - racketD/2);
 		});
 	});
+
 	/**
 	 * Function called when the ball touch the racket
 	*/
@@ -212,38 +229,36 @@
 		ballVelX 	*= 1.1;
 		ballVelZ	*= 1.1;
 
-		var ballSpeed	= Math.sqrt(ballVelX*ballVelX + ballVelZ*ballVelZ);		
-
+		var fxIntensity	= fxIntensityFromBallSpeed();
 
 		// tween the scale
+		var delayFwd	= 150+50*fxIntensity;
+		var delayBack	= 175+75*fxIntensity;
 		tQuery.createTween({
 			scale	: 1
 		}).easing(TWEEN.Easing.Bounce.Out).to({
-			scale	: 2
-		}, 200).onUpdate(function(){
+			scale	: 1+fxIntensity*1
+		}, delayFwd).onUpdate(function(){
 			player.object3d.scale(this.scale, this.scale, this.scale);
-		}).start().thenBounce(250).easing(TWEEN.Easing.Elastic.In).back()
+		}).start().thenBounce(delayBack).easing(TWEEN.Easing.Elastic.In).back()
 
 		// tween the positionZ/rotationZ
 		tQuery.createTween({ 
 			positionZ	: 0,
 			rotationZ	: 0
 		}).easing(TWEEN.Easing.Quintic.Out).to({
-			positionZ	: 0.2,
-			rotationZ	: Math.PI/3
-		}, 200).onUpdate(function(){
+			positionZ	: 0.05 + fxIntensity*0.15,
+			rotationZ	: Math.PI/(8-5*fxIntensity)
+		}, delayFwd).onUpdate(function(){
 			var playerId	= player.playerId;
 			var tObject3d	= player.object3d.get(0);
 			var positionZ	= playerId === 'right' ? +this.positionZ : -this.positionZ;
 			tObject3d.position.x	= positionZ + (1.3 * (playerId === "right" ? +1 : -1));
 			var rotationZ	= playerId === 'right' ? -this.rotationZ : +this.rotationZ;
 			tObject3d.rotation.z	= rotationZ;
-		}).start().thenBounce(250).easing(TWEEN.Easing.Sinusoidal.InOut).back()
-
-		// increase velocity 
-		ballVelX 	*= 1.1;
-		ballVelZ	*= 1.1;
+		}).start().thenBounce(delayBack).easing(TWEEN.Easing.Sinusoidal.InOut).back()
 		
+		// attemps to compute rebound angle with racket
 		if( false ){
 			var deltaZ	= player.object3d.get(0).position.z - ball3d.get(0).position.z;
 			deltaZ		/= racketD;
@@ -259,10 +274,6 @@
 			ballVelX	= Math.cos(ballAngle)*speed;
 			ballVelZ	= Math.sin(ballAngle)*speed;			
 		}
-		// change racket color randomly
-		//var color	= Math.floor(Math.random()*0xFFFFFF);
-		//console.log("color", "0x"+color.toString(16), new Date)
-		//player.object3d.get(0).material.color.setHex(color);
 	};
 
 	// constant for the field
@@ -296,6 +307,10 @@
 		if( position.x > +fieldW/2 - ballRadius/2)	ballVelX	*= -1;
 		if( position.z < -fieldD/2 + ballRadius/2)	ballVelZ	*= -1;
 		if( position.z > +fieldD/2 - ballRadius/2)	ballVelZ	*= -1;
+
+		// set volume depending on ballSpeed
+		var fxIntensity	= fxIntensityFromBallSpeed();
+		webaudio.volume(0.25+fxIntensity*0.25)
 
 		// get the boundaries
 		position.x	= Math.max(position.x, -fieldW/2+ballRadius/2);
@@ -352,7 +367,7 @@
 			scale	: 1
 		}).easing(TWEEN.Easing.Elastic.Out).to({
 			scale	: 2
-		}, 100).onUpdate(function(){
+		}, 300).onUpdate(function(){
 			object.scale(1, this.scale, this.scale);
 		}).start().thenBounce(200).easing(TWEEN.Easing.Linear.None).back()
 	}
