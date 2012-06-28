@@ -1,5 +1,8 @@
 <!doctype html><title>PongGL</title>
+<meta name="google-site-verification" content="QmhiyCP63g_11LWBaWOXsk9HqqJZcA9S7bVAsLGluAk" />
+
 <script src="vendor/tquery/tquery-bundle.js"></script>
+
 <script src="vendor/tquery/tquery.norequirejs.js"></script>
 
 <script src="vendor/threex/THREEx.KeyboardState.js"></script>
@@ -69,7 +72,6 @@
 	if( WebAudio.isAvailable ){
 		// init audio layer
 		var webaudio	= new WebAudio();
-		webaudio.volume(0.25)
 		// init each sound
 		var jsfxParam	= ["synth",5.0000,0.2960,0.0000,0.1700,0.0000,0.1600,110.0000,462.0000,2400.0000,-0.7400,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.2165,0.0260,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
 		var soundRacketBall	= webaudio.createSound().generateWithJsfx(jsfxParam);
@@ -310,7 +312,7 @@
 
 		// set volume depending on ballSpeed
 		var fxIntensity	= fxIntensityFromBallSpeed();
-		webaudio.volume(0.25+fxIntensity*0.25)
+		webaudio	&& webaudio.volume(0.4+fxIntensity*0.4)
 
 		// get the boundaries
 		position.x	= Math.max(position.x, -fieldW/2+ballRadius/2);

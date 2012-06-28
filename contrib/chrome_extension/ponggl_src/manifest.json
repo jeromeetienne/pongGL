@@ -1,10 +1,10 @@
 {
-	"name"		: "Marble Soccer",
-	"description"	: "Play Soccer with a Marble. It is fun and free",
+	"name"		: "PongGL",
+	"description"	: "Play Pong in 3D",
 	"version"	: "1.0.0",
 	"app"		: {
 		"launch": {
-			"web_url": "http://marblesoccer.com"
+			"web_url": "http://jeromeetienne.github.com/pongGL/"
 		}
 	},
 	"icons"	: {

@@ -1,14 +1,14 @@
 # just a little makefile to store repreatitive task
 
 #################################################################################
-#		marblesoccer								#
+#		ponggl								#
 #################################################################################
 
 build:
-	zip -r marblesoccer.zip marblesoccer_src
-	
+	zip -r ponggl.zip ponggl_src
+
 build_crx:
-	google-chrome --pack-extension=marblesoccer_src --pack-extension-key=$(HOME)/.chrome_extension_key.pem
+	google-chrome --pack-extension=ponggl_src --pack-extension-key=$(HOME)/.chrome_extension_key.pem
 	
 clean:
-	rm -rf marblesoccer.zip marblesoccer_src.crx
+	rm -rf ponggl.zip ponggl_src.crx
