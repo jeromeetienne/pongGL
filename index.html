@@ -1,7 +1,7 @@
 <!doctype html><title>PongGL</title>
 <!-- google webmaster auth code -->
 <head><meta name="google-site-verification" content="QmhiyCP63g_11LWBaWOXsk9HqqJZcA9S7bVAsLGluAk" />
-<!-- google analytic -->
+<!-- google analytic --> 
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -47,8 +47,9 @@
 
 <script src='vendor/tquery/tquery.minecraftchar.js'></script>
 
-<script src="vendor/webaudio.js"></script>
-<script src="vendor/webaudio.sound.jsfx.js"></script>
+<script src="vendor/webaudio.js/webaudio.js"></script>
+<script src="vendor/webaudio.js/webaudio.sound.jsfx.js"></script>
+
 <script src="vendor/jsfx/audio.js"></script>
 <script src="vendor/jsfx/jsfx.js"></script>
 <script src="vendor/jsfx/jsfxlib.js"></script>
@@ -56,34 +57,13 @@
 <script src="vendor/tquery/Tween.js"></script>
 <script src="vendor/tquery/tquery.tween.js"></script>
 
-<script src='vendor/soundmanager2/script/soundmanager2.js'></script>
+<script src="vendor/fireworks.js/fireworks-bundle.js"></script>
 
-<style>
-.score	{
-	position	: absolute;
-	top		: 0px;
-	z-index		: 1;
+<link	href="css/main.css" rel="stylesheet"></link>
 
-	font-family	: arial, verdana, sans-serif;
-	font-size	: 800%;
-	font-weight	: bolder;
-
-	color		: #dddddd;
-	text-shadow	: 0 0 0.2em #F87, 0 0 0.2em #F87, 0 0 0.2em #F87;
-
-	padding-left	: 10px;
-	padding-right	: 10px;
-}
-#scoreLeft {
-	left		: 0;	
-}
-#scoreRight {
-	right		: 0;	
-}
-</style>
 <body>
-<div id="scoreLeft"	class="score">0</div>
-<div id="scoreRight"	class="score">0</div>
+	<div id="scoreLeft"	class="score">0</div>
+	<div id="scoreRight"	class="score">0</div>
 <script>
 	if( WebAudio.isAvailable ){
 		// init audio layer
@@ -112,8 +92,8 @@
 	world.tCamera().lookAt(world.tScene().position);
 	
 	// add a blue sky
-	world.tRenderer().setClearColorHex(0,0);
-	tQuery.addBlueSkyBackground();
+//	world.tRenderer().setClearColorHex(1,1,1,1);
+//	tQuery.addBlueSkyBackground();
 	
 	// enable shadow in the renderer
 	world.tRenderer().shadowMapEnabled	= true;
@@ -390,5 +370,44 @@
 		}).start().thenBounce(200).easing(TWEEN.Easing.Linear.None).back()
 	}
 	
-	
+
+	//////////////////////////////////////////////////////////////////////////
+	//		Fireworks.js						//
+	//////////////////////////////////////////////////////////////////////////
+	var texture	= THREE.ImageUtils.loadTexture("vendor/fireworks.js/images/blue_particle.jpg");
+	var emitter	= Fireworks.createEmitter({nParticles : 20})
+		.useSpawnerSteadyRate(20)
+		.effectsStackBuilder()
+			.position(Fireworks.createShapeSphere(0, 0, 0, 0.5))
+			.velocity(Fireworks.createShapePoint(0, 0, 0))
+			.createEffect('scale', {
+					birthScale	: 1/40,
+					mulScale	: 0.97
+				}).onBirth(function(particle, deltaTime){
+					var object3d	= particle.get('threejsObject3D').object3d;
+					object3d.scale.set(this.opts.birthScale, this.opts.birthScale, this.opts.birthScale);
+				}).onUpdate(function(particle, deltaTime){
+					var object3d	= particle.get('threejsObject3D').object3d;
+					object3d.scale.multiplyScalar( this.opts.mulScale )
+				}).back()
+			.friction(0.85)
+			.lifeTime(0.5, 1.5)
+			.randomVelocityDrift(Fireworks.createVector(0.5, 0.5, 0.5))
+			.renderToThreejsObject3D({
+				container	: world,			
+				create		: function(){
+					return new THREE.Sprite({
+						map			: texture,
+						useScreenCoordinates	: false,
+						color			: 0xAA4488,
+						blending		: THREE.AdditiveBlending,
+					});
+				}	
+			})
+			.back()
+		.start();
+
+	world.loop().hook(function(delta, now){
+		emitter.update(delta).render();
+	})
 </script></body>
