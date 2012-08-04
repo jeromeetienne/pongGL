@@ -79,11 +79,12 @@ Fireworks.ComboEmitter.Smokepuff.prototype._emitterCtor	= function(){
 			.friction(0.90)
 			.randomVelocityDrift(Fireworks.createVector(20,10,0))
 			.createEffect('scale', {
+					scale	: 1,
 					origin	: 1/60,
 					factor	: 1.005
 				}).onBirth(function(particle){
 					var object3d	= particle.get('threejsObject3D').object3d;
-					var scale	= this.opts.origin * container.scale.x;
+					var scale	= this.opts.origin * this.opts.scale * container.scale.x;
 					object3d.scale.set(scale, scale)
 				}).onUpdate(function(particle, deltaTime){
 					var object3d	= particle.get('threejsObject3D').object3d;
@@ -110,18 +111,23 @@ Fireworks.ComboEmitter.Smokepuff.prototype._emitterCtor	= function(){
 				container	: container,
 				create		: function(){
 					return new THREE.Sprite({
-						//color		: 0x668844,
-						//color		: 0x8866aa,
-						// color		: 0x888888,
-						//color			: 0x666666,
 						color			: 0xcccccc,
 						useScreenCoordinates	: false,
 						map			: texture,
-						//blending		: THREE.AdditiveBlending,
 						transparent		: true
 					});
 				}	
 			})
+			.createEffect("spawnerIntensity")
+				.onIntensityChange(function(newIntensity, oldIntensity){
+					var emitter	= this.emitter();
+					// change velocity speed
+					var velocityOpts= emitter.effect('velocity').opts;
+					velocityOpts.speed	= 20 + newIntensity * 30;
+					// change scale
+					var scaleOpts	= emitter.effect('scale').opts;
+					scaleOpts.factor= 1.005 + 0.025 * newIntensity;
+				}).back()
 			.back()
 		.start();
 	// stop the spawner

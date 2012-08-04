@@ -60,8 +60,6 @@
 <script src="vendor/fireworks.js/fireworks-bundle.js"></script>
 <script src="vendor/fireworks.js/comboemitter.js"></script>
 <script src="vendor/fireworks.js/comboemitter_smokepuff.js"></script>
-<script src="vendor/fireworks.js/comboemitter_firepuff.js"></script>
-<script src="vendor/fireworks.js/tquery.textureutils.js"></script>
 
 <link	href="css/main.css" rel="stylesheet"></link>
 
@@ -107,10 +105,6 @@
 	var smokepuff	= new Fireworks.ComboEmitter.Smokepuff();
 	tQuery(smokepuff.object3D()).addTo(world).scale(1/10)
 	smokepuff.sound().volume(0.3)
-	var firepuff	= new Fireworks.ComboEmitter.Firepuff();
-	tQuery(firepuff.object3D()).addTo(world).scale(1/10)
-	firepuff.sound().volume(0.3)
-
 
 
 	/////////////////////////////////////////////////////////////////////////
@@ -187,12 +181,7 @@
 		score++;
 		element.innerHTML= score;
 
-		//soundLose && soundLose.play();
-		// update emitter's position just before the shoot then shoot
-		var ballPos	= ball3d.get(0).position.clone();
-		ballPos.multiplyScalar(0.8/firepuff.object3D().scale.x);
-		firepuff.emitter().effect('position').opts.shape.position.copy(ballPos);
-		firepuff.shoot();
+		soundLose && soundLose.play();
 
 		// reset ball velocity
 		ballAngle	= 0.1 * (Math.random()*2-1)*Math.PI*2;
@@ -238,17 +227,18 @@
 	 * Function called when the ball touch the racket
 	*/
 	players['right'].onContact = players['left'].onContact = function(player, ball3d){
-		// update emitter's position just before the shoot then shoot
-		var playerPos	= player.object3d.get(0).position;
-		playerPos	= playerPos.clone().multiplyScalar(1/smokepuff.object3D().scale.x);
-		smokepuff.emitter().effect('position').opts.shape.position.copy(playerPos);
-		smokepuff.shoot();
-
 		// increase velocity 
 		ballVelX 	*= 1.1;
 		ballVelZ	*= 1.1;
 
 		var fxIntensity	= fxIntensityFromBallSpeed();
+
+		// update emitter's position just before the shoot then shoot
+		var playerPos	= player.object3d.get(0).position.clone();
+		playerPos.multiplyScalar(1/smokepuff.object3D().scale.x);
+		smokepuff.emitter().effect('position').opts.shape.position.copy(playerPos);
+		smokepuff.emitter().intensity(fxIntensity)
+		smokepuff.shoot();
 
 		// tween the scale
 		var delayFwd	= 150+50*fxIntensity;
