@@ -58,6 +58,10 @@
 <script src="vendor/tquery/tquery.tween.js"></script>
 
 <script src="vendor/fireworks.js/fireworks-bundle.js"></script>
+<script src="vendor/fireworks.js/comboemitter.js"></script>
+<script src="vendor/fireworks.js/comboemitter_smokepuff.js"></script>
+<script src="vendor/fireworks.js/comboemitter_firepuff.js"></script>
+<script src="vendor/fireworks.js/tquery.textureutils.js"></script>
 
 <link	href="css/main.css" rel="stylesheet"></link>
 
@@ -69,9 +73,6 @@
 		// init audio layer
 		var webaudio	= new WebAudio();
 		// init each sound
-		var jsfxParam	= ["synth",5.0000,0.2960,0.0000,0.1700,0.0000,0.1600,110.0000,462.0000,2400.0000,-0.7400,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.2165,0.0260,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
-		var soundRacketBall	= webaudio.createSound().generateWithJsfx(jsfxParam);
-		soundRacketBall.volume(0.3)
 		var jsfxParam	= ["sine",5.0000,0.3220,0.0000,0.0040,0.3210,0.3060,20.0000,347.0000,2400.0000,0.0000,0.0000,0.0000,0.0100,0.0003,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,0.0000,1.0000,0.0000,0.0000,0.0000,0.0000];
 		var soundWall	= webaudio.createSound().generateWithJsfx(jsfxParam);
 		soundWall.volume(0.2)
@@ -79,8 +80,6 @@
 		var soundLose	= webaudio.createSound().generateWithJsfx(jsfxParam);		
 		soundLose.volume(0.3);
 	}
-
-
 
 	// create a tQuery.World
 	var world	= tQuery.createWorld().boilerplate().start();
@@ -92,8 +91,9 @@
 	world.tCamera().lookAt(world.tScene().position);
 	
 	// add a blue sky
-//	world.tRenderer().setClearColorHex(1,1,1,1);
-//	tQuery.addBlueSkyBackground();
+	world.tRenderer().setClearColorHex(1,1,1,1);
+//	world.tRenderer().setClearColorHex(0,0);
+	tQuery.addBlueSkyBackground();
 	
 	// enable shadow in the renderer
 	world.tRenderer().shadowMapEnabled	= true;
@@ -101,6 +101,17 @@
 
 	// enable tween updater	
 	world.enableTweenUpdater();
+
+	/////////////////////////////////////////////////////////////////////////
+	// init fireworks.js particles
+	var smokepuff	= new Fireworks.ComboEmitter.Smokepuff();
+	tQuery(smokepuff.object3D()).addTo(world).scale(1/10)
+	smokepuff.sound().volume(0.3)
+	var firepuff	= new Fireworks.ComboEmitter.Firepuff();
+	tQuery(firepuff.object3D()).addTo(world).scale(1/10)
+	firepuff.sound().volume(0.3)
+
+
 
 	/////////////////////////////////////////////////////////////////////////
 	// add the referee
@@ -175,7 +186,14 @@
 		var score	= parseInt(element.innerHTML);
 		score++;
 		element.innerHTML= score;
-		soundLose && soundLose.play();
+
+		//soundLose && soundLose.play();
+		// update emitter's position just before the shoot then shoot
+		var ballPos	= ball3d.get(0).position.clone();
+		ballPos.multiplyScalar(0.8/firepuff.object3D().scale.x);
+		firepuff.emitter().effect('position').opts.shape.position.copy(ballPos);
+		firepuff.shoot();
+
 		// reset ball velocity
 		ballAngle	= 0.1 * (Math.random()*2-1)*Math.PI*2;
 		ballAngle	+= playerId === 'right' ? 0 : Math.PI;
@@ -220,8 +238,11 @@
 	 * Function called when the ball touch the racket
 	*/
 	players['right'].onContact = players['left'].onContact = function(player, ball3d){
-		// play a sound
-		soundRacketBall && soundRacketBall.play();
+		// update emitter's position just before the shoot then shoot
+		var playerPos	= player.object3d.get(0).position;
+		playerPos	= playerPos.clone().multiplyScalar(1/smokepuff.object3D().scale.x);
+		smokepuff.emitter().effect('position').opts.shape.position.copy(playerPos);
+		smokepuff.shoot();
 
 		// increase velocity 
 		ballVelX 	*= 1.1;
@@ -369,45 +390,5 @@
 			object.scale(1, this.scale, this.scale);
 		}).start().thenBounce(200).easing(TWEEN.Easing.Linear.None).back()
 	}
-	
-
-	//////////////////////////////////////////////////////////////////////////
-	//		Fireworks.js						//
-	//////////////////////////////////////////////////////////////////////////
-	var texture	= THREE.ImageUtils.loadTexture("vendor/fireworks.js/images/blue_particle.jpg");
-	var emitter	= Fireworks.createEmitter({nParticles : 20})
-		.useSpawnerSteadyRate(20)
-		.effectsStackBuilder()
-			.position(Fireworks.createShapeSphere(0, 0, 0, 0.5))
-			.velocity(Fireworks.createShapePoint(0, 0, 0))
-			.createEffect('scale', {
-					birthScale	: 1/40,
-					mulScale	: 0.97
-				}).onBirth(function(particle, deltaTime){
-					var object3d	= particle.get('threejsObject3D').object3d;
-					object3d.scale.set(this.opts.birthScale, this.opts.birthScale, this.opts.birthScale);
-				}).onUpdate(function(particle, deltaTime){
-					var object3d	= particle.get('threejsObject3D').object3d;
-					object3d.scale.multiplyScalar( this.opts.mulScale )
-				}).back()
-			.friction(0.85)
-			.lifeTime(0.5, 1.5)
-			.randomVelocityDrift(Fireworks.createVector(0.5, 0.5, 0.5))
-			.renderToThreejsObject3D({
-				container	: world,			
-				create		: function(){
-					return new THREE.Sprite({
-						map			: texture,
-						useScreenCoordinates	: false,
-						color			: 0xAA4488,
-						blending		: THREE.AdditiveBlending,
-					});
-				}	
-			})
-			.back()
-		.start();
-
-	world.loop().hook(function(delta, now){
-		emitter.update(delta).render();
-	})
-</script></body>
+</script>
+</body>
