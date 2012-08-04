@@ -64,6 +64,16 @@
 <link	href="css/main.css" rel="stylesheet"></link>
 
 <body>
+	<div id='info' style='color:white'>
+		PongGL
+-
+3D with <a href='https://github.com/mrdoob/three.js/' target='_blank'>three.js</a> thru 
+<a href='http://jeromeetienne.github.com/tquery/' target='_blank'>tQuery API</a>
+<br/>
+Particles with <a href='https://github.com/jeromeetienne/fireworks.js/' target='_blank'>firework.js</a>
+-
+Sound with <a href='https://github.com/mrdoob/three.js/' target='_blank'>webaudio.js</a>
+	</info>
 	<div id="scoreLeft"	class="score">0</div>
 	<div id="scoreRight"	class="score">0</div>
 <script>
@@ -80,7 +90,7 @@
 	}
 
 	// create a tQuery.World
-	var world	= tQuery.createWorld().boilerplate().start();
+	var world	= tQuery.createWorld().boilerplate().pageTitle('#info').start();
 	// no camera controls is needed
 	world.removeCameraControls();
 	world.tCamera().position.y	= 5.5;
@@ -89,8 +99,8 @@
 	world.tCamera().lookAt(world.tScene().position);
 	
 	// add a blue sky
-	world.tRenderer().setClearColorHex(1,1,1,1);
-//	world.tRenderer().setClearColorHex(0,0);
+//	world.tRenderer().setClearColorHex(1,1,1,1);
+	world.tRenderer().setClearColorHex(0,0);
 	tQuery.addBlueSkyBackground();
 	
 	// enable shadow in the renderer
