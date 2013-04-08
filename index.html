@@ -195,7 +195,6 @@ Sound with <a href='https://github.com/jeromeetienne/webaudio.js/' target='_blan
 
 		// reset ball velocity
 		ballAngle	= 0.1 * (Math.random()*2-1)*Math.PI*2;
-		ballAngle	= 0;
 		ballAngle	+= playerId === 'right' ? 0 : Math.PI;
 		ballVelX	= Math.cos(ballAngle)*0.03;
 		ballVelZ	= Math.sin(ballAngle)*0.03;
@@ -238,9 +237,9 @@ Sound with <a href='https://github.com/jeromeetienne/webaudio.js/' target='_blan
 	 * Function called when the ball touch the racket
 	*/
 	players['right'].onContact = players['left'].onContact = function(player, ball3d){
-		// increase velocity 
-		ballVelX 	*= 1.1;
-		ballVelZ	*= 1.1;
+		// increase velocity by 5% everytime you connect
+		ballVelX 	*= 1.05;
+		ballVelZ	*= 1.05;
 
 
 		var fxIntensity	= fxIntensityFromBallSpeed();
@@ -305,7 +304,6 @@ Sound with <a href='https://github.com/jeromeetienne/webaudio.js/' target='_blan
 	var ballRadius	= 1/8;
 	var ballAngle	= Math.random()*Math.PI*2;
 	var ballAngle	= 0.1 * (Math.random()*2-1)*Math.PI*2;
-	var ballAngle	= 0;
 	var ballVelX	= Math.cos(ballAngle)*0.03;
 	var ballVelZ	= Math.sin(ballAngle)*0.03;
 	// create a tQuery.Object3d for the ball
@@ -398,4 +396,5 @@ Sound with <a href='https://github.com/jeromeetienne/webaudio.js/' target='_blan
 
 <!-- github ribbon -->
 <a href="https://github.com/jeromeetienne/ponggl" target='_blank'><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
 </body>
