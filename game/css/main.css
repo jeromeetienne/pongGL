@@ -1,0 +1,25 @@
+.score	{
+	position	: absolute;
+	top		: 0px;
+	z-index		: 1;
+
+	font-family	: arial, verdana, sans-serif;
+	font-size	: 800%;
+	font-weight	: bolder;
+
+	color		: #dddddd;
+	text-shadow	: 0 0 0.2em #F87, 0 0 0.2em #F87, 0 0 0.2em #F87;
+
+	padding-left	: 10px;
+	padding-right	: 10px;
+}
+#scoreLeft {
+	left		: 0;	
+}
+#scoreRight {
+	right		: 0;	
+}
+
+a {
+	color		: white;
+}
