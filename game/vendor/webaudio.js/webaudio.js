@@ -71,7 +71,7 @@ WebAudio.prototype.destroy	= function(){
 };
 
 /**
- * shim to get AudioContext
+ * shim to get AudioContext 
  */
 window.AudioContext	= window.AudioContext || window.webkitAudioContext;
 
