@@ -43,14 +43,14 @@
 */
 WebAudio	= function(){
 	// sanity check - the api MUST be available
-	console.assert(WebAudio.isAvailable === true, 'webkitAudioContext isnt available on your browser');
+	console.assert(WebAudio.isAvailable === true, 'AudioContext isnt available on your browser');
 
 	// create the context
-	this._ctx	= new webkitAudioContext();
+	this._ctx	= new AudioContext();
 
 	// setup the end of the node chain
 	// TODO later code the clipping detection from http://www.html5rocks.com/en/tutorials/webaudio/games/ 
-	this._gainNode	= this._ctx.createGainNode();
+	this._gainNode	= this._ctx.createGain();
 	this._compressor= this._ctx.createDynamicsCompressor();
 	this._gainNode.connect( this._compressor );
 	this._compressor.connect( this._ctx.destination );	
@@ -71,11 +71,16 @@ WebAudio.prototype.destroy	= function(){
 };
 
 /**
+ * shim to get AudioContext
+ */
+window.AudioContext	= window.AudioContext || window.webkitAudioContext;
+
+/**
  * 
  *
  * @return {Boolean} true if it is available or not
 */
-WebAudio.isAvailable	= window.webkitAudioContext ? true : false;
+WebAudio.isAvailable	= window.AudioContext ? true : false;
 
 //////////////////////////////////////////////////////////////////////////////////
 //										//
@@ -124,10 +129,10 @@ WebAudio.prototype.volume	= function(value){
  * Constructor
  *
  * @class builder to generate nodes chains. Used in WebAudio.Sound
- * @param {webkitAudioContext} audioContext the audio context
+ * @param {AudioContext} audioContext the audio context
 */
 WebAudio.NodeChainBuilder	= function(audioContext){
-	console.assert( audioContext instanceof webkitAudioContext );
+	console.assert( audioContext instanceof AudioContext );
 	this._context	= audioContext;
 	this._firstNode	= null;
 	this._lastNode	= null;
@@ -238,7 +243,7 @@ WebAudio.NodeChainBuilder.prototype.analyser	= function(properties){
  * @param {Object} [properties] properties to set in the created node
 */
 WebAudio.NodeChainBuilder.prototype.gainNode	= function(properties){
-	var node		= this._context.createGainNode()
+	var node		= this._context.createGain()
 	this._nodes.gainNode	= node;
 	return this._addNode(node, properties)
 };
@@ -326,8 +331,8 @@ WebAudio.Sound.prototype.play		= function(time){
 	if( time ===  undefined )	time	= 0;
 	// clone the bufferSource
 	var clonedNode	= this._chain.cloneBufferSource();
-	// set the noteOn
-	clonedNode.noteOn(time);
+	// set the start
+	clonedNode.start(time);
 	// create the source object
 	var source	= {
 		node	: clonedNode,
